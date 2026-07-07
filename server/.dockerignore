@@ -1,0 +1,43 @@
+# Dependencies (installed fresh inside the image)
+node_modules
+
+# Build output (generated inside the image)
+dist
+
+# Secrets — use docker-compose env instead
+.env
+.env.*
+
+# Git
+.git
+.gitignore
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+
+# Tests & coverage
+coverage
+**/*.test.ts
+**/*.spec.ts
+
+# WhatsApp Web.js session cache (local only)
+.wwebjs_auth
+.wwebjs_cache
+
+# Docs (not needed in the image)
+README.md
+*.md
+
+# Docker files (not needed inside the image)
+Dockerfile
+.dockerignore
+docker-compose*.yml
