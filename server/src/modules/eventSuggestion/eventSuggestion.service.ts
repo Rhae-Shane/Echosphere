@@ -382,7 +382,10 @@ export class EventSuggestionService {
 
     const response = await generateGeminiContent(prompt);
 
-    const analysisText = response.text;
+    const analysisText = response.text ?? '';
+    if (!analysisText) {
+      throw new AppError('Empty response from AI service', 502);
+    }
     return this.parseAIResponse(analysisText, pgCommunity.id, targetDate);
   }
 

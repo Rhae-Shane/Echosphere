@@ -29,7 +29,7 @@ import userStore from '@/store/userStore';
 import useModalStore from '@/store/modalStore';
 import { useNavigate } from 'react-router-dom';
 import ManualRequestForm from './ManualRequestForm';
-import EventDetailModal, { ResidentEvent } from './EventDetailModal';
+import EventDetailModal, { type ResidentEvent } from './EventDetailModal';
 import { serverUrl } from '@/utils';
 
 // Simple Badge Component
@@ -644,7 +644,7 @@ const ResidentDashboard = () => {
                       {
                         icon: CalendarDays,
                         label: 'Upcoming',
-                        value: dashboardData?.quickStats.upcomingEvents || 0,
+                        value: upcomingEvents.length || dashboardData?.quickStats.upcomingEvents || 0,
                         delay: 0.3
                       }
                     ].map((stat, index) => {
@@ -768,6 +768,86 @@ const ResidentDashboard = () => {
                               </motion.div>
                             )}
                           </div>
+                        </div>
+                      </Card>
+                    </motion.div>
+
+                    {/* Upcoming Events */}
+                    <motion.div
+                      initial={{ opacity: 0, x: -50 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.5 }}
+                      whileHover={{ scale: 1.02 }}
+                    >
+                      <Card
+                        className="border-0 rounded-2xl"
+                        style={{
+                          background: '#F4F4F4',
+                          boxShadow: '0 15px 30px rgba(0,0,0,0.12)',
+                          border: '2px solid rgba(255,255,255,0.95)'
+                        }}
+                      >
+                        <CardHeader className="px-6">
+                          <CardTitle className="text-lg font-bold text-gray-900 flex items-center justify-between gap-2">
+                            <span className="flex items-center gap-2">
+                              <motion.div
+                                animate={{ scale: [1, 1.2, 1] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                              >
+                                <CalendarDays className="h-5 w-5 text-orange-600" />
+                              </motion.div>
+                              Upcoming Events
+                            </span>
+                            {upcomingEvents.length > 0 && (
+                              <button
+                                onClick={() => setActiveTab('events')}
+                                className="text-xs font-semibold text-orange-600 hover:text-orange-700"
+                              >
+                                View all
+                              </button>
+                            )}
+                          </CardTitle>
+                        </CardHeader>
+                        <div className="px-6 pb-6">
+                          {upcomingEvents.length === 0 ? (
+                            <motion.div
+                              className="text-center py-8"
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.6 }}
+                            >
+                              <motion.div
+                                animate={{ y: [0, -5, 0] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                              >
+                                <CalendarDays className="mx-auto h-10 w-10 text-orange-300 mb-3" />
+                              </motion.div>
+                              <p className="text-gray-500 text-sm">No upcoming events</p>
+                            </motion.div>
+                          ) : (
+                            <div className="space-y-3">
+                              {upcomingEvents.slice(0, 4).map((event, index) => (
+                                <motion.div
+                                  key={event.id}
+                                  className="border-l-4 border-orange-400 pl-4 py-3 bg-white/50 rounded-r-lg cursor-pointer"
+                                  initial={{ opacity: 0, x: -20 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: 0.1 * index + 0.6 }}
+                                  whileHover={{ x: 5, backgroundColor: 'rgba(255,255,255,0.8)' }}
+                                  onClick={() => setSelectedEvent(event)}
+                                >
+                                  <p className="text-sm text-gray-900 font-semibold leading-relaxed">
+                                    {event.title}
+                                  </p>
+                                  <p className="text-xs text-gray-600 mt-1">{event.eventType}</p>
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    {new Date(event.startDate).toLocaleDateString()} ·{' '}
+                                    {event.location || 'Location TBD'}
+                                  </p>
+                                </motion.div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </Card>
                     </motion.div>
