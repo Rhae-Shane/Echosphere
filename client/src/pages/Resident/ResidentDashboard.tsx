@@ -29,6 +29,7 @@ import userStore from '@/store/userStore';
 import useModalStore from '@/store/modalStore';
 import { useNavigate } from 'react-router-dom';
 import ManualRequestForm from './ManualRequestForm';
+import EventDetailModal, { ResidentEvent } from './EventDetailModal';
 import { serverUrl } from '@/utils';
 
 // Simple Badge Component
@@ -81,19 +82,7 @@ interface Service {
   };
 }
 
-interface Event {
-  id: string;
-  title: string;
-  eventType: string;
-  startDate: string;
-  endDate: string;
-  description?: string;
-  userAttendanceStatus?: 'REGISTERED' | 'ATTENDED' | 'MISSED';
-  _count: {
-    attendances: number;
-    feedbacks: number;
-  };
-}
+interface Event extends ResidentEvent {}
 
 interface DashboardData {
   user: {
@@ -150,6 +139,7 @@ const ResidentDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   const {
     formRequestModal,
@@ -1070,12 +1060,13 @@ const ResidentDashboard = () => {
                                   whileHover={{ scale: 1.02, y: -2 }}
                                 >
                                   <Card
-                                    className="border-0 rounded-xl transition-all duration-300"
+                                    className="border-0 rounded-xl transition-all duration-300 cursor-pointer hover:shadow-md"
                                     style={{
                                       background: 'rgba(255, 255, 255, 0.8)',
                                       boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
                                       border: '1px solid rgba(255,255,255,0.95)'
                                     }}
+                                    onClick={() => setSelectedEvent(event)}
                                   >
                                     <div className="p-4">
                                       <h4 className="font-medium text-gray-900 mb-2">{event.title}</h4>
@@ -1145,12 +1136,13 @@ const ResidentDashboard = () => {
                                   whileHover={{ scale: 1.02, y: -2 }}
                                 >
                                   <Card
-                                    className="border-0 rounded-xl transition-all duration-300"
+                                    className="border-0 rounded-xl transition-all duration-300 cursor-pointer hover:shadow-md"
                                     style={{
                                       background: 'rgba(255, 255, 255, 0.8)',
                                       boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
                                       border: '1px solid rgba(255,255,255,0.95)'
                                     }}
+                                    onClick={() => setSelectedEvent(event)}
                                   >
                                     <div className="p-4">
                                       <h4 className="font-medium text-gray-900 mb-2">{event.title}</h4>
@@ -1203,6 +1195,16 @@ const ResidentDashboard = () => {
           </motion.div>
         </motion.div>
       )}
+
+      <AnimatePresence>
+        {selectedEvent && (
+          <EventDetailModal
+            event={selectedEvent}
+            isOpen={!!selectedEvent}
+            onClose={() => setSelectedEvent(null)}
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };
