@@ -12,6 +12,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { serverUrl } from '@/utils';
 import { useWhatsApp } from '@/services/whatsappService';
+import CreateEventModal from './CreateEventModal';
 
 interface Event {
   id: string;
@@ -97,6 +98,7 @@ const CommunityEvents: React.FC<CommunityEventsProps> = ({ communityId }) => {
 
   // QR Modal state
   const [showQRModal, setShowQRModal] = useState(false);
+  const [showCreateEventModal, setShowCreateEventModal] = useState(false);
 
   const {
     initializeWhatsApp,
@@ -736,6 +738,17 @@ const CommunityEvents: React.FC<CommunityEventsProps> = ({ communityId }) => {
       )}
 
       {/* Summary Cards */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-bold text-gray-900">Community Events</h2>
+        <button
+          onClick={() => setShowCreateEventModal(true)}
+          className="flex items-center bg-[#FF4500] text-white px-4 py-2 rounded-xl hover:bg-[#E03E00] transition-colors text-sm font-semibold"
+        >
+          <PlusIcon className="h-4 w-4 mr-1" />
+          Create Event
+        </button>
+      </div>
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
           <div className="flex items-center">
@@ -934,6 +947,17 @@ const CommunityEvents: React.FC<CommunityEventsProps> = ({ communityId }) => {
             })
           ) : null}
         </div>
+      )}
+
+      {showCreateEventModal && (
+        <CreateEventModal
+          communityId={communityId}
+          onClose={() => setShowCreateEventModal(false)}
+          onSuccess={() => {
+            setShowCreateEventModal(false);
+            loadEvents();
+          }}
+        />
       )}
 
       {/* Pagination */}
