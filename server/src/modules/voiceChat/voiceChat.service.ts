@@ -57,6 +57,59 @@ interface GeminiAnalysisResponse {
   requiredTechnicianField: TechnicianField;
 }
 
+const VALID_SERVICE_TYPES = new Set<string>(Object.values(ServiceType));
+const VALID_ISSUE_TYPES = new Set<string>(Object.values(IssueType));
+
+const ISSUE_TO_SERVICE_TYPE: Record<string, ServiceType> = {
+  PLUMBING: ServiceType.REPAIR,
+  ELECTRICAL: ServiceType.REPAIR,
+  HEATING_COOLING: ServiceType.REPAIR,
+  CLEANING: ServiceType.CLEANING,
+  SECURITY: ServiceType.MAINTENANCE,
+  INTERNET_WIFI: ServiceType.REPAIR,
+  APPLIANCE: ServiceType.REPAIR,
+  STRUCTURAL: ServiceType.REPAIR,
+  PEST_CONTROL: ServiceType.MAINTENANCE,
+  OTHER: ServiceType.OTHER,
+};
+
+const SERVICE_TO_ISSUE_TYPE: Record<string, IssueType> = {
+  CLEANING: IssueType.CLEANING,
+  MAINTENANCE: IssueType.OTHER,
+  REPAIR: IssueType.OTHER,
+  INSTALLATION: IssueType.OTHER,
+  UPGRADE: IssueType.OTHER,
+  INSPECTION: IssueType.OTHER,
+  OTHER: IssueType.OTHER,
+};
+
+function toServiceType(category: string): ServiceType {
+  if (VALID_SERVICE_TYPES.has(category)) {
+    return category as ServiceType;
+  }
+  return ISSUE_TO_SERVICE_TYPE[category] ?? ServiceType.OTHER;
+}
+
+function toIssueType(category: string): IssueType {
+  if (VALID_ISSUE_TYPES.has(category)) {
+    return category as IssueType;
+  }
+  return SERVICE_TO_ISSUE_TYPE[category] ?? IssueType.OTHER;
+}
+
+function normalizeAnalysisCategory(analysis: GeminiAnalysisResponse): GeminiAnalysisResponse {
+  if (!analysis.hasValidInformation) {
+    return analysis;
+  }
+
+  return {
+    ...analysis,
+    category: analysis.isIssue
+      ? toIssueType(String(analysis.category))
+      : toServiceType(String(analysis.category)),
+  };
+}
+
 interface CreateServiceData {
   issue_description?: string;
   issue_location: string;
@@ -546,7 +599,7 @@ async function analyzeManualInputWithGemini(data: CreateServiceData): Promise<Ge
       throw new Error('Invalid analysis response from Gemini - missing required fields');
     }
 
-    return analysis;
+    return normalizeAnalysisCategory(analysis);
 
   } catch (error) {
     console.error('Error analyzing manual input with Gemini:', error);
@@ -764,7 +817,7 @@ async function analyzeIssueWithGemini(callReport: VoiceChatData['call_report']):
       throw new Error('Invalid analysis response from Gemini - missing required fields');
     }
 
-    return analysis;
+    return normalizeAnalysisCategory(analysis);
 
   } catch (error) {
     console.error('Error analyzing with Gemini:', error);
@@ -943,7 +996,7 @@ async function createAndAssignIssue(params: {
     data: {
       title: analysisResult.title,
       description: analysisResult.description,
-      issueType: analysisResult.category as IssueType,
+      issueType: toIssueType(String(analysisResult.category)),
       priorityLevel: analysisResult.priority,
       location: location,
       status: technicianId ? 'ASSIGNED' : 'PENDING',
@@ -986,7 +1039,7 @@ async function createAndAssignService(params: {
     data: {
       title: analysisResult.title,
       description: analysisResult.description,
-      serviceType: analysisResult.category as ServiceType,
+      serviceType: toServiceType(String(analysisResult.category)),
       priorityLevel: analysisResult.priority,
       location: location,
       status: 'AWAITING_APPROVAL', // Services need owner approval first
